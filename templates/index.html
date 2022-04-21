@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="shortcut icon" href="/public/logo.svg" type="image/x-icon">
+  <title>Thevvx URL Shortener</title>
+  <script src="https://cdn.tailwindcss.com/3.0.24"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid h-screen place-items-center bg-gradient-to-b from-blue-500 via-violet-500 to-purple-600">
+    <div class="flex flex-col gap-4">
+      <h1 class="text-5xl text-center font-bold text-white uppercase">
+        URL Shortener🔗
+      </h1>
+      <form class="flex flex-row gap-2" id="shorten">
+        <input
+          type="text"
+          class="w-full rounded-lg shadow-xl border p-1 outline-none focus:ring ring-red-500 duration-200"
+          placeholder="Enter looooong url..."
+          id="long-url"
+        >
+        <button class="px-4 py-2 text-white uppercase border-2 border-red-500 hover:bg-red-500 rounded-lg shadow-lg duration-200">
+          Shorten
+        </button>
+      </form>
+      <p class="text-center font-bold text-white">
+        Shortened URL: <span id="short-url" class="underline cursor-pointer"></span>
+      </p>
+    </div>
+    <div class="absolute bottom-0 opacity-30">
+      <div class="flex flex-row items-center justify-center">
+        <img src="/public/logo.svg" alt="Thevvx URL Shortener" class="h-12">
+        <h1 class="text-white">
+          By <a href="https://github.com/thevvx" target="_blank">thevvx</a>
+        </h1>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  const form = document.getElementById('shorten');
+
+  form.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+
+    let longUrl = document.getElementById('long-url')?.value;
+    let shortUrl = document.getElementById('short-url');
+
+    if (!longUrl) {
+      return shortUrl.innerText = 'Please enter URL';
+    } else if (!new RegExp("https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)").test(longUrl)) {
+      return shortUrl.innerText = 'Please enter a valid URL (Must start with http:// or https://)';
+    } else {
+      shortUrl.innerText = 'Shortening...';
+      fetch('/create/url', {
+        method: "POST",
+        body: JSON.stringify({
+          url: longUrl
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.json())
+      .then((data) => {
+        shortUrl.innerText = data.short_url;
+        shortUrl.onclick = () => {
+          window.open(data.short_url, '_blank');
+        }
+      })
+    }
+  })
+</script>
+</html>

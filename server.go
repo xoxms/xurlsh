@@ -51,6 +51,9 @@ func main() {
 
   r := gin.Default()
 
+  r.StaticFile("/", "./templates/index.html")
+  r.Static("/public", "./public")
+
   r.POST("/create/url", func(c *gin.Context) {
     type Url struct {
       Url string `json:"url"`
@@ -138,6 +141,12 @@ func main() {
     c.Redirect(http.StatusPermanentRedirect, url)
   })
 
-  port := os.Getenv("PORT")
-  log.Fatal(r.Run(":" + port))
+  isProduction := os.Getenv("RAILWAY_ENVIRONMENT") == "production"
+
+  if isProduction {
+    port := os.Getenv("PORT")
+    log.Fatal(r.RunTLS(":"+port, "./ssl/cert.pem", "./ssl/key.pem"))
+  } else {
+    log.Fatal(r.Run(":8080"))
+  }
 }
